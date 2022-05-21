@@ -145,7 +145,9 @@ def get_plates_by_regex(regex: str):
 def license_management():
     plates = get_all_plates_for_user(LicensePlate=LicensePlate, user_id=current_user.id)
     if request.method == 'POST':
-        return redirect(url_for("add_plate"))
+        regex = request.form['regex_search']
+        regex = base64.b64encode(regex.encode('utf-8'))
+        return redirect(url_for("get_plates_by_regex", regex=regex))
     return render_template('license_management.html', page_title="Admin Panel", plates=plates)
 
 
