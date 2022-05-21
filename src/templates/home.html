@@ -1,0 +1,8 @@
+{% if current_user.is_authenticated %}
+    Hi {{ current_user.username }}! <br>
+    <a href="{{ url_for('logout') }}">Logout</a><br>
+    <a href="{{ url_for('license_management') }}">License management</a><br>
+{% else %}
+    <a href="{{ url_for('login') }}">Login</a><br>
+    <a href="{{ url_for('register') }}">Register</a>
+{% endif %}

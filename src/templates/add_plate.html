@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<body>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="notification is-danger">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
+    <form method="POST">
+        PLATE NUMBER: <br>
+        <input name="plate_nb"> <br>
+        COMMENT:  <br>
+        <input name="comment"><br>
+        <input type="submit">
+    </form>
+</body>
+</html>
