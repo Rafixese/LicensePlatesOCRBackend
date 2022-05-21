@@ -3,13 +3,13 @@
 import json
 import os
 
-from flask import Flask, Response
+from flask import Flask, Response, request, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-from src.utils.db_utils import get_all_plates
+from src.utils.db_utils import get_all_plates, delete_user_from_db, get_all_users, get_all_plates_for_user, \
+    delete_plate_from_db
 from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
@@ -39,6 +39,8 @@ class LicensePlate(db.Model):
 
 db.create_all()
 db.session.commit()
+# TODO: ZMIENIĆ !!!!
+current_user_id = 1
 
 
 # The route() function of the Flask class is a decorator,
@@ -63,8 +65,22 @@ def get_info_about_plate(plate_nb: str):
     return Response(status=404)
 
 
+@app.route('/license_managment', methods=['POST', 'GET'])
+def admin():
+    plates = get_all_plates_for_user(LicensePlate, current_user_id)
+    return render_template('admin.html', page_title="Admin Panel", plates=plates)
+
+
+@app.route('/delete_user/<plate_id>', methods=["POST", "GET"])
+def delete_plate(plate_id):
+    delete_plate_from_db(LicensePlate, plate_id, db)
+    return render_template("delete_plate.html")
+
+
 # main driver function
+
+
 if __name__ == '__main__':
     # run() method of Flask class runs the application
     # on the local development server.
-    app.run()
+    app.run(debug=True)
