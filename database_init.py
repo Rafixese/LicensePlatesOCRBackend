@@ -5,8 +5,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from src.utils.solutionutils import get_project_root
-
-app = Flask(__name__)
+from app import app
+# app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'sqlite:///' + os.path.join(get_project_root(), 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
