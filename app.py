@@ -1,22 +1,17 @@
 # Importing flask module in the project is mandatory
 # An object of Flask class is our WSGI application.
-from flask import Flask
-from src.utils.db_utils import get_all_plates
-from src.utils.license_plates_comparator import LicensePlatesComparator
-from flask import request, redirect
+import json
 import os
-import uuid
 
-from flask import Flask
+from flask import Flask, Response
 from flask_sqlalchemy import SQLAlchemy
 
+from src.utils.db_utils import get_all_plates
+from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
-# Flask constructor takes the name of
-# current module (__name__) as argument.
+
+
 app = Flask(__name__)
-
-
-# app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'sqlite:///' + os.path.join(get_project_root(), 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -62,11 +57,10 @@ def get_info_about_plate(plate_nb: str):
 
     for plate in plates:
         if comparator.compare_license_plates_strings(plate_nb, plate.plate_nb):
-            if plate.comment:
-                return plate.comment
-            else:
-                return "Found in database, but nothing special"
-    return "Plate not found in database"
+            return Response(json.dumps({'plate': plate.plate_nb, 'comment': plate.comment}), status=200,
+                            mimetype='application/json')
+
+    return Response(status=404)
 
 
 # main driver function
