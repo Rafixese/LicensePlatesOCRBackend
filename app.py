@@ -1,13 +1,10 @@
-# Importing flask module in the project is mandatory
-# An object of Flask class is our WSGI application.
 import json
 import os
 
 from flask import Flask, Response, request, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-from src.utils.db_utils import get_all_plates, delete_user_from_db, get_all_users, get_all_plates_for_user, \
-    delete_plate_from_db
+from src.utils.db_utils import get_all_plates, delete_license_plate_from_db, insert_license_plate_to_db,get_all_plates_for_user,delete_plate_from_db
 from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
 
@@ -43,11 +40,7 @@ db.session.commit()
 current_user_id = 1
 
 
-# The route() function of the Flask class is a decorator,
-# which tells the application which URL should call 
-# the associated function.
 @app.route('/')
-# ‘/’ URL is bound with hello_world() function.
 def hello_world():
     return 'Hello World'
 
@@ -80,7 +73,34 @@ def delete_plate(plate_id):
 # main driver function
 
 
+@app.route('/insert_license_plate')
+def insert_license_plate():
+    plate_nb = request.args.get('plate_nb')
+    plate_comment = request.args.get('plate_comment')
+    # TODO USERA DODAC :~D!!!
+    user_id = 1
+
+    # Plate duplicate
+    if LicensePlate.query.filter_by(plate_nb=plate_nb).first():
+        return Response(status=404)
+
+    insert_license_plate_to_db(plate_nb=plate_nb, user_id=user_id, comment=plate_comment, db=db,
+                               LicensePlate=LicensePlate)
+    return Response(status=200)
+
+
+@app.route('/delete_license_plate')
+def delete_license_plate():
+    plate_nb = request.args.get('plate_nb')
+
+    # There are no plate with plate_nb number
+    if not LicensePlate.query.filter_by(plate_nb=plate_nb).first():
+        return Response(status=404)
+
+    delete_license_plate_from_db(plate_nb=plate_nb, db=db, LicensePlate=LicensePlate)
+    return Response(status=200)
+
+
 if __name__ == '__main__':
-    # run() method of Flask class runs the application
-    # on the local development server.
     app.run(debug=True)
+
