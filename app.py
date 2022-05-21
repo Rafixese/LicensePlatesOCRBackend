@@ -3,15 +3,15 @@
 import json
 import os
 
-from flask import Flask, Response
+from flask import Flask, Response, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash
 
 from src.utils.db_utils import get_all_plates
 from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
 
-
-app = Flask(__name__)
+app = Flask(__name__, template_folder='./src/templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'sqlite:///' + os.path.join(get_project_root(), 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -41,13 +41,32 @@ db.create_all()
 db.session.commit()
 
 
-# The route() function of the Flask class is a decorator,
-# which tells the application which URL should call 
-# the associated function.
 @app.route('/')
-# ‘/’ URL is bound with hello_world() function.
-def hello_world():
-    return 'Hello World'
+def index():
+    return render_template('home.html', title='Home')
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html', title='Login')
+
+
+@app.route('/register')
+def register():
+    return render_template('register.html', title='Register')
+
+
+@app.route('/register', methods=['POST'])
+def register_post():
+    name = request.form.get('name')
+    password = request.form.get('password')
+    try:
+        new_user = User(username=name, password=generate_password_hash(password, method='sha256'))
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception:
+        return Response(status=400)
+    return redirect(url_for('login'))
 
 
 @app.route('/check_license/<plate_nb>')
