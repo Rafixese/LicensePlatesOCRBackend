@@ -63,8 +63,6 @@ def get_info_about_plate(plate_nb: str):
 def license_management():
     plates = get_all_plates_for_user(LicensePlate=LicensePlate, user_id=current_user_id)
     if request.method == 'POST':
-        # print(request.form)
-        # if 'add_plate' in request.form:
         return redirect(url_for("add_plate"))
     return render_template('license_management.html', page_title="Admin Panel", plates=plates)
 
@@ -72,10 +70,13 @@ def license_management():
 @app.route('/delete_license_plate/<plate_nb>', methods=["POST", "GET"])
 def delete_plate(plate_nb):
     # There are no plate with plate_nb number
+    if request.method == 'POST':
+        return redirect(url_for("license_management"))
     if not LicensePlate.query.filter_by(plate_nb=plate_nb).first():
         return Response(status=404)
 
     delete_license_plate_from_db(plate_nb=plate_nb, db=db, LicensePlate=LicensePlate)
+
     return render_template("delete_plate.html")
 
 
