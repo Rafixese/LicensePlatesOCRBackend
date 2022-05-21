@@ -2,7 +2,7 @@ import json
 import os
 
 from flask import Flask, Response, render_template, request, redirect, url_for, flash
-from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user
+from flask_login import UserMixin, LoginManager, login_user, login_required, current_user, logout_user
 from flask import Flask, Response, request, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,7 +21,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
-login_manager.login_view = 'app.login'
+login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 
@@ -53,7 +53,7 @@ class LicensePlate(db.Model):
 db.create_all()
 db.session.commit()
 # TODO: ZMIENIĆ !!!!
-current_user_id = 1
+
 
 
 @app.route('/')
@@ -121,14 +121,16 @@ def get_info_about_plate(plate_nb: str):
 
 
 @app.route('/license_management', methods=['POST', 'GET'])
+@login_required
 def license_management():
-    plates = get_all_plates_for_user(LicensePlate=LicensePlate, user_id=current_user_id)
+    plates = get_all_plates_for_user(LicensePlate=LicensePlate, user_id=current_user.id)
     if request.method == 'POST':
         return redirect(url_for("add_plate"))
     return render_template('license_management.html', page_title="Admin Panel", plates=plates)
 
 
 @app.route('/delete_license_plate/<plate_nb>', methods=["POST", "GET"])
+@login_required
 def delete_plate(plate_nb):
     # There are no plate with plate_nb number
     if request.method == 'POST':
@@ -142,43 +144,19 @@ def delete_plate(plate_nb):
 
 
 @app.route('/add_plate', methods=["POST", "GET"])
+@login_required
 def add_plate():
     if request.method == 'POST':
         plate_nb = request.form['plate_nb']
         comment = request.form['comment']
-
-        insert_license_plate_to_db(plate_nb=plate_nb, user_id=current_user_id, comment=comment, db=db,
-                                   LicensePlate=LicensePlate)
+        try:
+            insert_license_plate_to_db(plate_nb=plate_nb, user_id=current_user.id, comment=comment, db=db,
+                                       LicensePlate=LicensePlate)
+        except:
+            flash("License already in base")
+            return redirect(url_for('add_plate'))
         return redirect(url_for("license_management"))
     return render_template("add_plate.html")
-
-
-@app.route('/insert_license_plate')
-def insert_license_plate():
-    plate_nb = request.args.get('plate_nb')
-    plate_comment = request.args.get('plate_comment')
-    # TODO USERA DODAC :~D!!!
-    user_id = 1
-
-    # Plate duplicate
-    if LicensePlate.query.filter_by(plate_nb=plate_nb).first():
-        return Response(status=404)
-
-    insert_license_plate_to_db(plate_nb=plate_nb, user_id=user_id, comment=plate_comment, db=db,
-                               LicensePlate=LicensePlate)
-    return Response(status=200)
-
-
-# @app.route('/delete_license_plate')
-# def delete_license_plate():
-#     plate_nb = request.args.get('plate_nb')
-#
-#     # There are no plate with plate_nb number
-#     if not LicensePlate.query.filter_by(plate_nb=plate_nb).first():
-#         return Response(status=404)
-#
-#     delete_license_plate_from_db(plate_nb=plate_nb, db=db, LicensePlate=LicensePlate)
-#     return Response(status=200)
 
 
 if __name__ == '__main__':
