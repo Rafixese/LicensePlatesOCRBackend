@@ -59,11 +59,14 @@ def hello_world():
 def get_info_about_plate(plate_nb: str):
     plates = get_all_plates(LicensePlate)
     comparator = LicensePlatesComparator()
-    #
+
     for plate in plates:
         if comparator.compare_license_plates_strings(plate_nb, plate.plate_nb):
-            return plate.comment
-    return plate_nb
+            if plate.comment:
+                return plate.comment
+            else:
+                return "Found in database, but nothing special"
+    return "Plate not found in database"
 
 
 # main driver function
