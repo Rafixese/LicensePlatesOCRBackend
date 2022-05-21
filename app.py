@@ -2,6 +2,8 @@
 # An object of Flask class is our WSGI application.
 import json
 import os
+import re
+import base64
 
 from flask import Flask, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -61,6 +63,25 @@ def get_info_about_plate(plate_nb: str):
                             mimetype='application/json')
 
     return Response(status=404)
+
+
+@app.route('/regex_plates/<regex>')
+def get_plates_by_regex(regex: str):
+    regex = base64.b64decode(regex).decode('utf-8')
+    plates = get_all_plates(LicensePlate)
+    matches_pl = []
+    matches_cm = []
+    for plate in plates:
+        x = re.findall(regex, plate.plate_nb)
+        if ''.join(x) != '':
+            matches_pl.append(plate.plate_nb)
+            matches_cm.append(plate.comment)
+            # matches_cm.append(x)
+    if len(matches_pl):
+        return Response(json.dumps({'plate': matches_pl, 'comment': matches_cm}), status=200,
+                        mimetype='application/json')
+    else:
+        return Response(status=404)
 
 
 # main driver function
