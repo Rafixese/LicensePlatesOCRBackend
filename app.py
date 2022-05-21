@@ -1,15 +1,12 @@
-# Importing flask module in the project is mandatory
-# An object of Flask class is our WSGI application.
 import json
 import os
 
-from flask import Flask, Response
+from flask import Flask, Response, request
 from flask_sqlalchemy import SQLAlchemy
 
-from src.utils.db_utils import get_all_plates
+from src.utils.db_utils import get_all_plates, add_license_plate
 from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
@@ -41,11 +38,7 @@ db.create_all()
 db.session.commit()
 
 
-# The route() function of the Flask class is a decorator,
-# which tells the application which URL should call 
-# the associated function.
 @app.route('/')
-# ‘/’ URL is bound with hello_world() function.
 def hello_world():
     return 'Hello World'
 
@@ -63,8 +56,17 @@ def get_info_about_plate(plate_nb: str):
     return Response(status=404)
 
 
-# main driver function
+@app.route('/insert_license_plate')
+def insert_license_plate():
+    plate_nb = request.args.get('plate_nb')
+    plate_comment = request.args.get('plate_comment')
+
+    # TODO USERA DODAC :~D!!!
+    user_id = 1
+
+    add_license_plate(plate_nb=plate_nb, user_id=user_id, comment=plate_comment, db=db, LicensePlate=LicensePlate)
+    return Response(status=200)
+
+
 if __name__ == '__main__':
-    # run() method of Flask class runs the application
-    # on the local development server.
     app.run()
