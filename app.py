@@ -4,7 +4,7 @@ import os
 from flask import Flask, Response, request
 from flask_sqlalchemy import SQLAlchemy
 
-from src.utils.db_utils import get_all_plates, add_license_plate
+from src.utils.db_utils import get_all_plates, delete_license_plate_from_db, insert_license_plate_to_db
 from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
 
@@ -60,11 +60,27 @@ def get_info_about_plate(plate_nb: str):
 def insert_license_plate():
     plate_nb = request.args.get('plate_nb')
     plate_comment = request.args.get('plate_comment')
-
     # TODO USERA DODAC :~D!!!
     user_id = 1
 
-    add_license_plate(plate_nb=plate_nb, user_id=user_id, comment=plate_comment, db=db, LicensePlate=LicensePlate)
+    # Plate duplicate
+    if LicensePlate.query.filter_by(plate_nb=plate_nb).first():
+        return Response(status=404)
+
+    insert_license_plate_to_db(plate_nb=plate_nb, user_id=user_id, comment=plate_comment, db=db,
+                               LicensePlate=LicensePlate)
+    return Response(status=200)
+
+
+@app.route('/delete_license_plate')
+def delete_license_plate():
+    plate_nb = request.args.get('plate_nb')
+
+    # There are no plate with plate_nb number
+    if not LicensePlate.query.filter_by(plate_nb=plate_nb).first():
+        return Response(status=404)
+
+    delete_license_plate_from_db(plate_nb=plate_nb, db=db, LicensePlate=LicensePlate)
     return Response(status=200)
 
 
