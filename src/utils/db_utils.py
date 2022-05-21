@@ -17,11 +17,6 @@ def get_all_plates(LicensePlate):
     return LicensePlate.query.all()
 
 
-def delete_plate_from_db(LicensePlate, plate_id, db):
-    LicensePlate.query.filter_by(id=plate_id).delete()
-    db.session.commit()
-
-
 def insert_license_plate_to_db(plate_nb: str, user_id: int, comment: str, db, LicensePlate):
     db.session.add(LicensePlate(plate_nb=plate_nb,
                                 user_id=user_id,

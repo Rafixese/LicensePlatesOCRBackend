@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+
+<body>
+    {% for plate in plates %}
+    {{ plate.plate_nb }}   <a href="{{ url_for('delete_plate', plate_nb=plate.plate_nb) }}"> Delete this plate </a>
+    <br>
+    {% endfor %}
+        <form method="POST">
+            <button name="add_plate">Add Plate</button>
+        </form>
+</body>
+</html>
