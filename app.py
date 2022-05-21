@@ -1,14 +1,14 @@
-# Importing flask module in the project is mandatory
-# An object of Flask class is our WSGI application.
 import json
 import os
 
 from flask import Flask, Response, render_template, request, redirect, url_for, flash
-from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user
+from flask_login import UserMixin, LoginManager, login_user, login_required, current_user, logout_user
+from flask import Flask, Response, request, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from src.utils.db_utils import get_all_plates
+from src.utils.db_utils import get_all_plates, delete_license_plate_from_db, insert_license_plate_to_db, \
+    get_all_plates_for_user
 from src.utils.license_plates_comparator import LicensePlatesComparator
 from src.utils.solutionutils import get_project_root
 
@@ -21,7 +21,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
-login_manager.login_view = 'app.login'
+login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 
@@ -52,6 +52,8 @@ class LicensePlate(db.Model):
 
 db.create_all()
 db.session.commit()
+# TODO: ZMIENIĆ !!!!
+
 
 
 @app.route('/')
@@ -118,8 +120,44 @@ def get_info_about_plate(plate_nb: str):
     return Response(status=404)
 
 
-# main driver function
+@app.route('/license_management', methods=['POST', 'GET'])
+@login_required
+def license_management():
+    plates = get_all_plates_for_user(LicensePlate=LicensePlate, user_id=current_user.id)
+    if request.method == 'POST':
+        return redirect(url_for("add_plate"))
+    return render_template('license_management.html', page_title="Admin Panel", plates=plates)
+
+
+@app.route('/delete_license_plate/<plate_nb>', methods=["POST", "GET"])
+@login_required
+def delete_plate(plate_nb):
+    # There are no plate with plate_nb number
+    if request.method == 'POST':
+        return redirect(url_for("license_management"))
+    if not LicensePlate.query.filter_by(plate_nb=plate_nb).first():
+        return Response(status=404)
+
+    delete_license_plate_from_db(plate_nb=plate_nb, db=db, LicensePlate=LicensePlate)
+
+    return render_template("delete_plate.html")
+
+
+@app.route('/add_plate', methods=["POST", "GET"])
+@login_required
+def add_plate():
+    if request.method == 'POST':
+        plate_nb = request.form['plate_nb']
+        comment = request.form['comment']
+        try:
+            insert_license_plate_to_db(plate_nb=plate_nb, user_id=current_user.id, comment=comment, db=db,
+                                       LicensePlate=LicensePlate)
+        except:
+            flash("License already in base")
+            return redirect(url_for('add_plate'))
+        return redirect(url_for("license_management"))
+    return render_template("add_plate.html")
+
+
 if __name__ == '__main__':
-    # run() method of Flask class runs the application
-    # on the local development server.
-    app.run()
+    app.run(debug=True)
