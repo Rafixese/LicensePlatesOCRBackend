@@ -1,19 +1,34 @@
-<!DOCTYPE html>
+<head>
+    <title>Login page</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
+</head>
 
 <body>
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div class="notification is-danger">
-            {{ messages[0] }}
-        </div>
-    {% endif %}
-{% endwith %}
-    <form method="POST">
-        PLATE NUMBER: <br>
-        <input name="plate_nb"> <br>
-        COMMENT:  <br>
-        <input name="comment"><br>
-        <input type="submit">
-    </form>
+
+<div class="content">
+
+    <div class="header"><a href="{{ url_for('index') }}">LicensePlatesOCR</a></div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="addplate-box">
+        <form method="POST">
+            <div class="field">
+                <input name="plate_nb" placeholder="plate number">
+            </div>
+
+            <div class="field">
+                <input name="comment" placeholder="comment">
+            </div>
+
+            <input type="submit" class="button-80" value="ADD PLATE">
+        </form>
+    </div>
+</div>
 </body>
-</html>

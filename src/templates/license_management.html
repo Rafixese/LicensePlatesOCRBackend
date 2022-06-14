@@ -1,16 +1,37 @@
-<!DOCTYPE html>
+<head>
+    <title>LicensePlatesOCR - Management</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
+</head>
 
 <body>
-    <form method="POST">
-        <input type="text" name="regex_search">
-        <button type="submit">Get Plates</button>
-    </form>
-    <br>
+    <div class="content">
 
-    {% for plate in plates %}
-    {{ plate.plate_nb }} {{ plate.comment }}  <a href="{{ url_for('delete_plate', plate_nb=plate.plate_nb) }}"> Delete this plate </a>
-    <br>
-    {% endfor %}
-    <a href="{{ url_for('add_plate') }}"><button name="add_plate">Add Plate</button></a>
+        <div class="header"><a href="{{ url_for('index') }}">LicensePlatesOCR</a></div>
+
+        <div class="management-box">
+
+            <table class="plate-table">
+                <tr>
+                    <th class="plate-header">Plate</th>
+                    <th class="comment-header">Comment</th>
+                    <th class="delete-header">Delete</th>
+                </tr>
+            {% for plate in plates %}
+                <tr>
+                    <td class="plate">{{ plate.plate_nb }}</td>
+                    <td class="comment">{{ plate.comment }}</td>
+                    <td class="delete"><a href="{{ url_for('delete_plate', plate_nb=plate.plate_nb) }}">X</a></td>
+                </tr>
+            {% endfor %}
+            </table>
+
+            <form method="POST">
+                <div class="field"><input type="text" name="regex_search" placeholder="get plates by regex"></div>
+                <button type="submit" class="button-80">GET PLATES</button>
+            </form>
+            <br>
+
+            <a href="{{ url_for('add_plate') }}"><button name="add_plate" class="button-80">ADD PLATE</button></a>
+        </div>
+    </div>
 </body>
-</html>

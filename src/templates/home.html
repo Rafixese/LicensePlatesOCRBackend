@@ -1,8 +1,33 @@
-{% if current_user.is_authenticated %}
-    Hi {{ current_user.username }}! <br>
-    <a href="{{ url_for('logout') }}">Logout</a><br>
-    <a href="{{ url_for('license_management') }}">License management</a><br>
-{% else %}
-    <a href="{{ url_for('login') }}">Login</a><br>
-    <a href="{{ url_for('register') }}">Register</a>
-{% endif %}
+<head>
+    <title>LicensePlatesOCR - Home</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
+</head>
+
+<body>
+    <div class="content">
+
+        <div class="header"><a href="{{ url_for('index') }}">LicensePlatesOCR</a></div>
+
+        <div class="home-box">
+            {% if current_user.is_authenticated %}
+                <h1 class="siema">Hi {{ current_user.username }}!</h1>
+
+                <a href="{{ url_for('logout') }}">
+                    <button class="button-80">LOGOUT</button>
+                </a><br>
+
+                <a href="{{ url_for('license_management') }}">
+                    <button class="button-80">LICENSE MANAGEMENT</button>
+                </a><br>
+
+            {% else %}
+            <a href="{{ url_for('login') }}">
+                <button class="button-80">LOGIN</button>
+            </a><br>
+                <a href="{{ url_for('register') }}">
+                    <button class="button-80">REGISTER</button>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</body>

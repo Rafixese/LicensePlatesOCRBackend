@@ -162,7 +162,7 @@ def delete_plate(plate_nb):
 
     delete_license_plate_from_db(plate_nb=plate_nb, db=db, LicensePlate=LicensePlate)
 
-    return render_template("delete_plate.html")
+    return redirect(url_for("license_management"))
 
 
 @app.route('/add_plate', methods=["POST", "GET"])
